@@ -16,5 +16,6 @@ notifications:
   email: false
 
 after_success:
+  - rm rra_bot.sqlite
   - npm run coveralls
 
