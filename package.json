@@ -1,0 +1,12 @@
+{
+  "name": "grb",
+  "description": "grb",
+  "version": "0.0.1",
+  "dependencies": {
+    "iconv-lite": "^0.4.13",
+    "jsdom": "^6.5.1",
+    "knex": "^0.9.0",
+    "mysql": "^2.9.0",
+    "twit": "^2.1.1"
+  }
+}
