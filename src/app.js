@@ -11,8 +11,6 @@ let request = require('request');
 let cheerio = require('cheerio');
 let encoding = require('encoding');
 
-let schedule = require('node-schedule');
-
 let manufacturers = require('./manufacturers');
 
 const table_name = 'rra_bot';
@@ -41,11 +39,37 @@ class App {
 			}
 		})
 		.then(() => {
-			self.isReady = true;
-			
 			if(process.env.NODE_ENV !== "test") {
-				self.start();
-				schedule.scheduleJob('*/5 * * * *', self.start.bind(this));
+				Promise.resolve(0).then(function loop(i) {
+					console.log(i);
+					
+					return self.start().then((date) => {
+						return self.parse(date, 1).then(function loop(data) {
+							if(data.items.length > 0) {
+								return self.insert(data.items, data.date, data.page).then((data) => {
+									return self.parse(data.date, data.page + 1).then((data) => {
+										return new Promise((resolve, reject) => {
+											resolve(data);
+										});
+									});
+								}).then(loop);
+							}
+							else {
+								return Promise.resolve();
+							}
+						});
+					}).then(() => {
+						return self.tweet();
+					}).catch((e) => {
+						console.log(e);
+					}).then(() => {
+						return new Promise((resolve, reject) => {
+							setTimeout(() => {
+								resolve(i + 1);
+							}, 5 * 60 * 1000);
+						});
+					}).then(loop);
+				});
 			}
 		});
 	}
@@ -53,29 +77,24 @@ class App {
 	start() {
 		let self = this;
 		
-		let date = new Date();
-		date = date.toISOString().split('T').shift().replace(/-/g, '');
-		
-		if(self.isReady) {
-			self.parse(date, 1);
-			self.isReady = false;
-		}
+		return new Promise((resolve, reject) => {
+			let date = new Date();
+			date = date.toISOString().split('T').shift().replace(/-/g, '');
+			
+			resolve(date);
+		});
 	}
 	
-	parse(date, page, callback) {
+	parse(date, page) {
 		let self = this;
 		
-		if(callback === undefined) {
-			callback = () => {};
-		}
-		
-		let url = `http://rra.go.kr/ko/license/A_c_search_view.do?cpage=${page}&category=&fromdate=${date}&todate=${date}`;
-		request({
-			method: 'GET',
-			url: url,
-			encoding: 'binary'
-		}, (err, res, body) => {
-			try {
+		return new Promise((resolve, reject) => {
+			let url = `http://rra.go.kr/ko/license/A_c_search_view.do?cpage=${page}&category=&fromdate=${date}&todate=${date}`;
+			request({
+				method: 'GET',
+				url: url,
+				encoding: 'binary'
+			}, (err, res, body) => {
 				if(!err && res.statusCode === 200) {
 					let $ = cheerio.load(encoding.convert(body, 'utf-8', 'euc-kr'));
 					
@@ -108,83 +127,92 @@ class App {
 						}
 					});
 					
-					if(items.length > 0) {
-						let id = items[items.length - 1].id;
-						knex(table_name).where({
-							id: id
-						}).then((rows) => {
-							let promises = items.map((item) => {
-								return knex(table_name).where({
-									id: item.id
-								}).then((rows) => {
-									if(rows.length === 0) {
-										return knex(table_name).insert(item);
-									}
-									else {
-										return Promise.resolve();
-									}
-								});
-							});
-							Promise.all(promises).then(() => {
-								if(process.env.NODE_ENV !== 'test') {
-									if(rows.length === 0) {
-										self.parse(date, page + 1);
-									}
-									else {
-										self.tweet();
-									}
-								}
-								callback(true);
-							});
-						});
+					resolve({
+						items: items,
+						date: date,
+						page: page
+					});
+				}
+				else {
+					resolve({
+						items: [],
+						date: date,
+						page: page
+					});
+				}
+			});
+		});
+	}
+	
+	insert(items, date, page) {
+		let self = this;
+		
+		return new Promise((resolve, reject) => {
+			let promises = items.map((item) => {
+				return knex(table_name).where({
+					id: item.id
+				}).then((rows) => {
+					if(rows.length === 0) {
+						return knex(table_name).insert(item);
 					}
 					else {
-						if(process.env.NODE_ENV !== 'test') {
-							self.tweet();
-						}
-						callback(true);
+						return Promise.resolve();
 					}
-				}
-			}
-			catch(e) {
-				console.log(e);
-				callback(false);
-			}
+				});
+			});
+			Promise.all(promises).then(() => {
+				resolve({
+					date: date,
+					page: page
+				});
+			});
 		});
 	}
 	
 	tweet() {
 		let self = this;
 		
-		knex(table_name).where({
-			tweet: 0
-		}).then((rows) => {
-			rows.forEach((row) => {
-				let status = `[${row.date}]\n[${row.manufacturer}]\n[${row.model}]\n[${row.type}]\n`;
-				if(status.length > (140 - 22)) {
-					row.type = row.type.substr(0, row.type.length - (status.length - (140 - 22)) - 1);
-					row.type += '…';
-					
-					status = `[${row.date}]\n[${row.manufacturer}]\n[${row.model}]\n[${row.type}]\n`;
-				}
-				status += `http://rra.go.kr/ko/license/A_b_popup.do?app_no=${row.id}`;
-				
-				if(process.env.NODE_ENV !== 'test') {
-					twit.post('statuses/update', {
-						status: status
-					}, (err, res) => {
-						if(err) {
-							console.log(err);
+		return new Promise((resolve, reject) => {
+			knex(table_name).where({
+				tweet: 0
+			}).then((rows) => {
+				let promises = rows.map((row) => {
+					return new Promise((resolve, reject) => {
+						let status = `[${row.date}]\n[${row.manufacturer}]\n[${row.model}]\n[${row.type}]\n`;
+						if(status.length > (140 - 22)) {
+							row.type = row.type.substr(0, row.type.length - (status.length - (140 - 22)) - 1);
+							row.type += '…';
+							
+							status = `[${row.date}]\n[${row.manufacturer}]\n[${row.model}]\n[${row.type}]\n`;
 						}
+						status += `http://rra.go.kr/ko/license/A_b_popup.do?app_no=${row.id}`;
 						
-						row.tweet = 1;
-						knex(table_name).where({
-							id: row.id
-						}).update(row).return();
+						if(process.env.NODE_ENV !== 'test') {
+							twit.post('statuses/update', {
+								status: status
+							}, (err, res) => {
+								if(err) {
+									throw new Error(err);
+								}
+								
+								knex(table_name).where({
+									id: row.id
+								}).update({
+									tweet: 1
+								}).then(() => {
+									resolve();
+								});
+							});
+						}
+						else {
+							resolve();
+						}
 					});
-				}
+				});
+				Promise.all(promises).then(() => {
+					resolve();
+				});
 			});
-			self.isReady = true;
 		});
 	}
 }
