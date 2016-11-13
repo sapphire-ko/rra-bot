@@ -101,7 +101,8 @@ class Parser {
 
 					return promise.then(() => {
 						return self._insertItem(item);
-					});
+					})
+					.catch(err => console.error(err));
 				}
 			}, Promise.resolve())
 			.then(() => {

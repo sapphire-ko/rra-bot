@@ -4,8 +4,6 @@ import Sequelize from 'sequelize';
 
 import Device from '../models/device';
 
-let isInitialized = false;
-
 class Database {
 	static initialize(config) {
 		let self = this;
@@ -26,11 +24,12 @@ class Database {
 			return model.sync();
 		}))
 		.then(() => {
-			isInitialized = true;
+			self.isInitialized = true;
 
 			return Promise.resolve();
 		})
-		.catch(() => {
+		.catch((err) => {
+			console.error(err);
 			return Promise.resolve();
 		});
 	}
@@ -38,10 +37,14 @@ class Database {
 	static instance() {
 		let self = this;
 
-		if(isInitialized) {
+		console.log(self.isInitialized);
+
+		if(self.isInitialized) {
 			return self;
 		}
 	}
 }
+
+Database.isInitialized = false;
 
 export default Database;

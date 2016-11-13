@@ -2,11 +2,12 @@
 
 let path = require('path');
 
+let nodeExternals = require('webpack-node-externals');
+
 module.exports = {
 	entry: './src/app',
 	output: {
 		path: path.resolve(__dirname + '/dist'),
-		publicPath: '/',
 		filename: 'app.js',
 	},
 	target: 'node',
@@ -23,7 +24,7 @@ module.exports = {
 			},
 		],
 	},
-	externals: {
-		'sequelize': 'require(\'sequelize\')',
-	},
+	externals: [
+		nodeExternals(),
+	],
 };

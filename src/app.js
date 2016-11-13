@@ -8,10 +8,12 @@ import Tweeter from './libs/tweeter';
 
 class App {
 	start() {
+		console.log(path.resolve(__dirname, '../database.sqlite'));
+		
 		Promise.all([
 			Database.initialize({
 				dialect: 'sqlite',
-				logging: false,
+//				logging: false,
 				storage: path.resolve(__dirname, '../database.sqlite')
 			})
 		])
@@ -22,7 +24,7 @@ class App {
 			return Promise.resolve(0);
 		})
 		.then(function loop(i) {
-			console.log(i); // eslint-disable-line
+			console.log(i);
 
 			const date = new Date();
 			const dateString = `${date.getFullYear()}${`0${date.getMonth() + 1}`.substr(-2)}${`0${date.getDate()}`.substr(-2)}`;
@@ -31,7 +33,8 @@ class App {
 			.then(function loop(data) {
 				if(data.items.length > 0) {
 					return Parser.parse(data.date, data.page + 1)
-					.then(loop);
+					.then(loop)
+					.catch(err => console.error(err));
 				}
 			})
 			.then(() => {
@@ -41,8 +44,10 @@ class App {
 				setTimeout(() => {
 					loop(i + 1);
 				}, 5 * 60 * 1000);
-			});
-		});
+			})
+			.catch(err => console.error(err));
+		})
+		.catch(err => console.error(err));
 	}
 }
 

@@ -63,7 +63,8 @@ class Tweeter {
 					});
 				});
 			}));
-		});
+		})
+		.catch(err => console.error(err));
 	}
 }
 
