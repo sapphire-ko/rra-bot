@@ -4,8 +4,6 @@ import request from 'request';
 import cheerio from 'cheerio';
 import encoding from 'encoding';
 
-import Database from './database';
-
 import manufacturers from './manufacturers';
 
 class Parser {
@@ -61,20 +59,6 @@ class Parser {
 		return item;
 	}
 
-	static _insertItem(item) {
-		let self = this;
-
-		return self.database.device.findOrCreate({
-			where: item
-		});
-	}
-
-	static start() {
-		let self = this;
-
-		self.database = Database.instance().database;
-	}
-
 	static parse(date, page) {
 		let self = this;
 
@@ -86,47 +70,23 @@ class Parser {
 
 			let items = [];
 
-			const $trs = $('table.thos_s tr');
+			$('table.thos_s tr').each((i, e) => {
+				if(i >= 2) {
+					let item = self._parseItem($, $(e));
 
-			return Array.apply(null, new Array($trs.length - 2)).reduce((promise, _, i) => {
-				const $tr = $trs.eq(i + 2);
-
-				let item = self._parseItem($, $tr);
-
-				if(Object.keys(item).length === 0) {
-					return promise;
+					if(Object.keys(item).length !== 0) {
+						items.push(item);
+					}
 				}
-				else {
-					items.push(item);
-
-					return promise.then(() => {
-						return self._insertItem(item);
-					})
-					.catch(err => console.error(err));
-				}
-			}, Promise.resolve())
-			.then(() => {
-				return Promise.resolve({
-					items: items,
-					date: date,
-					page: page
-				});
-			})
-			.catch(() => {
-				return Promise.resolve({
-					items: [],
-					date: date,
-					page: page
-				});
 			});
-		})
-		.catch(() => {
+
 			return Promise.resolve({
-				items: [],
+				items: items,
 				date: date,
 				page: page
 			});
-		});
+		})
+		.catch((err) => console.error(err));
 	}
 }
 

@@ -11,6 +11,9 @@ module.exports = {
 		filename: 'app.js',
 	},
 	target: 'node',
+	node: {
+		__dirname: true,
+	},
 	module: {
 		loaders: [
 			{

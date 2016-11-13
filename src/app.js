@@ -6,39 +6,48 @@ import Database from './libs/database';
 import Parser from './libs/parser';
 import Tweeter from './libs/tweeter';
 
+import CONFIG from '../config';
+
+import {
+	dateToString
+} from './utils';
+
 class App {
 	start() {
 		console.log(path.resolve(__dirname, '../database.sqlite'));
-		
+
 		Promise.all([
 			Database.initialize({
 				dialect: 'sqlite',
-//				logging: false,
+				logging: false,
 				storage: path.resolve(__dirname, '../database.sqlite')
-			})
+			}),
+			Tweeter.initialize(CONFIG)
 		])
 		.then(() => {
-			Parser.start();
-			Tweeter.start();
-
 			return Promise.resolve(0);
 		})
 		.then(function loop(i) {
 			console.log(i);
 
-			const date = new Date();
-			const dateString = `${date.getFullYear()}${`0${date.getMonth() + 1}`.substr(-2)}${`0${date.getDate()}`.substr(-2)}`;
+			const dateString = dateToString(new Date());
 
 			return Parser.parse(dateString, 1)
 			.then(function loop(data) {
 				if(data.items.length > 0) {
-					return Parser.parse(data.date, data.page + 1)
+					return Database.insert(data.items)
+					.then(() => {
+						return Parser.parse(data.date, data.page + 1);
+					})
 					.then(loop)
 					.catch(err => console.error(err));
 				}
 			})
 			.then(() => {
-				return Tweeter.tweet();
+				return Database.select();
+			})
+			.then((devices) => {
+				return Tweeter.tweet(devices);
 			})
 			.then(() => {
 				setTimeout(() => {
@@ -52,8 +61,6 @@ class App {
 }
 
 let app = new App();
-if(process.env.NODE_ENV !== 'test') {
-	app.start();
-}
+app.start();
 
 export default App;
