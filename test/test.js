@@ -1,6 +1,6 @@
 'use strict';
 
-import fs from 'fs';
+let fs = require('fs');
 let path = require('path');
 
 let assert = require('assert');

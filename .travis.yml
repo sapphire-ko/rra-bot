@@ -9,13 +9,10 @@ node_js:
 sudo: false
 
 script:
-  - cp config.sample.js config.js
   - npm test
 
 notifications:
   email: false
 
 after_success:
-  - rm rra_bot.sqlite
   - npm run coveralls
-
