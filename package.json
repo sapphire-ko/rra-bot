@@ -4,7 +4,7 @@
   "description": "@rra_bot",
   "main": "./src/app.js",
   "scripts": {
-    "prestart": "babel src/app.js --out-file dist/app.js",
+    "prestart": "webpack",
     "start": "pm2 start ./app.json",
     "stop": "pm2 stop ./app.json",
     "test": "NODE_ENV=test mocha --compilers js:babel-core/register",
