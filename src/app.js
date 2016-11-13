@@ -14,8 +14,6 @@ import {
 
 class App {
 	start() {
-		console.log(path.resolve(__dirname, '../database.sqlite'));
-
 		Promise.all([
 			Database.initialize({
 				dialect: 'sqlite',
