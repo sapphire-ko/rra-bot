@@ -1,0 +1,33 @@
+'use strict';
+
+export default [
+	'APPLE INC.',
+	'ATI TECHNOLOGIES ULC',
+	'AVERMEDIA TECHNOLOG...',
+	'CANON INC',
+	'DELL INC.',
+	'EIZO Corporation',
+	'Google Inc.',
+	'GoPro, Inc.',
+	'HTC Corporation',
+	'HUAWEI TECHNOLOGIES...',
+	'INTEL CORPORATION',
+	'MICROSOFT CORPORATI...',
+	'NINTENDO CO., LTD.',
+	'NVIDIA CORPORATION',
+	'Oculus VR, Inc.',
+	'Oculus VR, LLC',
+	'Sony Mobile Communi...',
+	'WACOM CO., LTD.',
+	'Xiaomi Communicatio...',
+	'(주) 소니컴퓨터엔터테인먼트코리아',
+	'(주)아이리버',
+	'(주)유니아나 수원공장',
+	'(주)코원시스템',
+	'(주)팬택',
+	'구글코리아 유한회사',
+	'삼성전자(주)',
+	'소니코리아(주)',
+	'애플코리아 유한회사',
+	'엘지전자(주)'
+];
