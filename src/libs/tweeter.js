@@ -21,7 +21,7 @@ class Tweeter {
 	static _sendTweet(device) {
 		let self = this;
 
-		const status = self._composeTweet(device);
+		const status = self.composeTweet(device);
 
 		return new Promise((resolve) => {
 			self.twit.post('statuses/update', {
@@ -55,7 +55,6 @@ class Tweeter {
 		let self = this;
 
 		return Promise.all(devices.map((device) => {
-			return Promise.resolve();
 			return self._sendTweet(device);
 		}));
 	}
