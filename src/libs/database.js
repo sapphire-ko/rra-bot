@@ -4,12 +4,19 @@ import Sequelize from 'sequelize';
 
 import Device from '../models/device';
 
+const Op = Sequelize.Op;
+
 class Database {
 	static _insertItem(item) {
 		let self = this;
 
 		return self.database.device.findOrCreate({
-			where: item
+			where: {
+				id: {
+					[Op.eq]: item.id
+				}
+			},
+			defaults: item
 		});
 	}
 
@@ -28,7 +35,9 @@ class Database {
 
 		return self.database.device.findAll({
 			where: {
-				tweet: 0
+				tweet: {
+					[Op.eq]: 0
+				}
 			}
 		});
 	}
@@ -40,7 +49,9 @@ class Database {
 			tweet: 1
 		}, {
 			where: {
-				id
+				id: {
+					[Op.eq]: id
+				}
 			}
 		});
 	}

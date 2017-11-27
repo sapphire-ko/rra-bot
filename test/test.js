@@ -1,15 +1,16 @@
 'use strict';
 
-let fs = require('fs');
-let path = require('path');
+import fs from 'fs';
+import path from 'path';
+import assert from 'assert';
 
-let assert = require('assert');
+import Sequelize from 'sequelize';
 
-let Database = require('../src/libs/database').default;
-let Parser = require('../src/libs/parser').default;
-let Tweeter = require('../src/libs/tweeter').default;
+import Database from '../src/libs/database';
+import Parser from '../src/libs/parser';
+import Tweeter from '../src/libs/tweeter';
 
-let utils = require('../src/utils');
+import * as utils from '../src/utils';
 
 describe('@rra_bot', function() {
 	describe('database', function() {
@@ -18,6 +19,7 @@ describe('@rra_bot', function() {
 		before(function(done) {
 			Database.initialize({
 				dialect: 'sqlite',
+				operatorsAliases: Sequelize.Op,
 				logging: false,
 				storage: databasePath
 			})
@@ -134,7 +136,7 @@ describe('@rra_bot', function() {
 
 	describe('utils', function() {
 		it('date to string', function() {
-			let dateString = utils.dateToString(new Date('2016-11-11'));
+			const dateString = utils.dateToString(new Date('2016-11-11'));
 
 			assert.equal(dateString, '20161111');
 		});

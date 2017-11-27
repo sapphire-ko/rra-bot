@@ -2,6 +2,8 @@
 
 import path from 'path';
 
+import Sequelize from 'sequelize';
+
 import Database from './libs/database';
 import Parser from './libs/parser';
 import Tweeter from './libs/tweeter';
@@ -17,6 +19,7 @@ class App {
 		Promise.all([
 			Database.initialize({
 				dialect: 'sqlite',
+				operatorsAliases: Sequelize.Op,
 				logging: false,
 				storage: path.resolve(__dirname, '../database.sqlite')
 			}),
