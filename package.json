@@ -10,7 +10,7 @@
     "dev": "babel-node ./src/main.js",
     "eslint": "eslint .",
     "test": "cross-env NODE_ENV=test mocha --require babel-core/register",
-    "test-coverage": "cross-env NODE_ENV=test istanbul cover --report lcovonly _mocha -- ./test --compilers js:babel-core/register",
+    "test-coverage": "cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha ./test --require babel-core/register",
     "coveralls": "npm run test-coverage && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
@@ -38,13 +38,15 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-plugin-istanbul": "^4.1.5",
+    "babel-plugin-transform-es2015-classes": "^6.24.1",
     "babel-preset-env": "^1.6.1",
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.1",
     "eslint": "^4.12.1",
-    "istanbul": "^0.4.5",
     "json-loader": "^0.5.7",
     "mocha": "^4.0.1",
+    "nyc": "^11.3.0",
     "webpack": "^3.9.1",
     "webpack-node-externals": "^1.6.0"
   }

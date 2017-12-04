@@ -20,6 +20,7 @@ class Parser {
 				'url': url,
 				'encoding': 'binary',
 			}, (err, res, body) => {
+				/* istanbul ignore else  */
 				if(!err && res.statusCode === 200) {
 					resolve(body);
 				}
