@@ -7,6 +7,8 @@
     "prestart": "webpack",
     "start": "pm2 start ./app.json",
     "stop": "pm2 stop ./app.json",
+    "dev": "babel-node ./src/main.js",
+    "eslint": "eslint .",
     "test": "cross-env NODE_ENV=test mocha --require babel-core/register",
     "test-coverage": "cross-env NODE_ENV=test istanbul cover --report lcovonly _mocha -- ./test --compilers js:babel-core/register",
     "coveralls": "npm run test-coverage && cat ./coverage/lcov.info | coveralls"
@@ -22,13 +24,15 @@
   },
   "homepage": "https://github.com/sapphiredev/rra_bot#readme",
   "dependencies": {
+    "bluebird": "^3.5.1",
     "cheerio": "^1.0.0-rc.2",
     "encoding": "^0.1.12",
     "node-schedule": "^1.2.5",
     "request": "^2.83.0",
-    "sequelize": "^4.23.1",
+    "sequelize": "^4.26.0",
     "sqlite3": "^3.1.13",
-    "twit": "^2.2.9"
+    "twit": "^2.2.9",
+    "twitter-text": "^1.14.7"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -37,10 +41,11 @@
     "babel-preset-env": "^1.6.1",
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.1",
-    "istanbul": "^1.0.0-alpha.2",
+    "eslint": "^4.12.1",
+    "istanbul": "^0.4.5",
     "json-loader": "^0.5.7",
     "mocha": "^4.0.1",
-    "webpack": "^3.8.1",
+    "webpack": "^3.9.1",
     "webpack-node-externals": "^1.6.0"
   }
 }

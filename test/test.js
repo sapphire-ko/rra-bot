@@ -1,10 +1,9 @@
-'use strict';
-
 import fs from 'fs';
 import path from 'path';
 import assert from 'assert';
 
 import Sequelize from 'sequelize';
+import TwitterText from 'twitter-text';
 
 import Database from '../src/libs/database';
 import Parser from '../src/libs/parser';
@@ -12,40 +11,43 @@ import Tweeter from '../src/libs/tweeter';
 
 import * as utils from '../src/utils';
 
-describe('@rra_bot', function() {
-	describe('database', function() {
-		const databasePath = path.resolve(__dirname, '../database.test.sqlite');
+describe('@rra_bot', () => {
+	const item = {
+		'id': '201617100000226884',
+		'date': '2016-11-11',
+		'type': '기타도라 기타프릭스',
+		'model': 'GITADORA GuitarFrea...',
+		'manufacturer': '(주)유니아나 수원공장',
+		'tweet': 0,
+	};
 
-		before(function(done) {
-			Database.initialize({
-				dialect: 'sqlite',
-				operatorsAliases: Sequelize.Op,
-				logging: false,
-				storage: databasePath
-			})
+	describe('database', () => {
+		const databasePath = path.resolve(__dirname, '../database.test.sqlite');
+		const database = new Database({
+			'dialect': 'sqlite',
+			'operatorsAliases': Sequelize.Op,
+			'logging': false,
+			'storage': databasePath,
+		});
+
+		before((done) => {
+			database.initialize()
 			.then(() => {
 				done();
 			});
-		})
+		});
 
-		it('insert', function(done) {
-			Database.insert([
-				{
-					id: '201617100000226884',
-					date: '2016-11-11',
-					type: '기타도라 기타프릭스',
-					model: 'GITADORA GuitarFrea...',
-					manufacturer: '(주)유니아나 수원공장',
-					tweet: '0'
-				}
+		it('insert', (done) => {
+			database.insert([
+				item,
 			])
 			.then(() => {
 				done();
 			});
 		});
 
-		it('select', function(done) {
-			Database.select()
+		it('select', (done) => {
+			database.select()
 			.then((devices) => {
 				assert.equal(devices.length, 1);
 
@@ -53,34 +55,38 @@ describe('@rra_bot', function() {
 			});
 		});
 
-		it('update', function(done) {
-			Database.update('201617100000226884')
+		it('update', (done) => {
+			database.update(item)
 			.then(() => {
-				return Database.select();
+				return database.select();
 			})
-			.then((devices) => {
-				assert.equal(devices.length, 0);
+			.then((items) => {
+				assert.equal(items.length, 0);
 
 				done();
 			});
 		});
 
-		after(function() {
+		after(() => {
 			fs.unlinkSync(databasePath);
 		});
 	});
 
-	describe('parser', function() {
+	describe('parser', () => {
+		const parser = new Parser();
+
 		it('parse valid', function(done) {
-			this.timeout(5000);
+			this.timeout(100000);
 
-			Parser.parse('20161111', 1)
-			.then((data) => {
-				assert.equal(data.items.length, 10);
-				assert.equal(data.items[0].id, '201617100000227140');
-				assert.equal(data.date, '20161111');
-				assert.equal(data.page, 1);
+			parser.parse('20161111')
+			.then((items) => {
+				assert.equal(items.length, 142);
+				assert.equal(items[0].id, '201617100000227140');
 
+				done();
+			})
+			.catch((err) => {
+				assert.fail(err);
 				done();
 			})
 			.catch((err) => {
@@ -89,14 +95,15 @@ describe('@rra_bot', function() {
 		});
 
 		it('parse invalid', function(done) {
-			this.timeout(5000);
+			this.timeout(100000);
 
-			Parser.parse('20161112', 1)
-			.then((data) => {
-				assert.equal(data.items.length, 0);
-				assert.equal(data.date, '20161112');
-				assert.equal(data.page, 1);
-
+			parser.parse('20161112', 1)
+			.then((items) => {
+				assert.equal(items.length, 0);
+				done();
+			})
+			.catch((err) => {
+				assert.fail(err);
 				done();
 			})
 			.catch((err) => {
@@ -105,37 +112,38 @@ describe('@rra_bot', function() {
 		});
 	});
 
-	describe('tweeter', function() {
-		before(function(done) {
-			Tweeter.initialize({
-				consumer_key: 'invalid_key',
-				consumer_secret: 'invalid_key',
-				access_token: 'invalid_key',
-				access_token_secret: 'invalid_key'
-			})
+	describe('tweeter', () => {
+		const tweeter = new Tweeter({
+			'consumer_key': 'invalid_key',
+			'consumer_secret': 'invalid_key',
+			'access_token': 'invalid_key',
+			'access_token_secret': 'invalid_key',
+		});
+
+		before((done) => {
+			tweeter.initialize()
 			.then(() => {
 				done();
 			});
 		});
 
-		it('compose tweet', function(done) {
-			const status = Tweeter.composeTweet({
-				id: '201617100000226884',
-				date: '2016-11-11',
-				type: '기타도라 기타프릭스',
-				model: 'GITADORA GuitarFrea...',
-				manufacturer: '(주)유니아나 수원공장',
-				tweet: '0'
-			});
+		it('compose tweet', () => {
+			const status = tweeter._composeTweet(item);
 
 			assert.equal(status, '[2016-11-11]\n[(주)유니아나 수원공장]\n[GITADORA GuitarFrea...]\n[기타도라 기타프릭스]\nhttp://rra.go.kr/ko/license/A_b_popup.do?app_no=201617100000226884');
+		});
 
-			done();
+		it('trim tweet', () => {
+			item.type = item.type.repeat(10);
+
+			const status = tweeter._composeTweet(item);
+
+			assert.equal(TwitterText.getTweetLength(status), 140);
 		});
 	});
 
-	describe('utils', function() {
-		it('date to string', function() {
+	describe('utils', () => {
+		it('date to string', () => {
 			const dateString = utils.dateToString(new Date('2016-11-11'));
 
 			assert.equal(dateString, '20161111');

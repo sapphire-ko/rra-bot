@@ -1,5 +1,3 @@
-'use strict';
-
 export default [
 	'APPLE INC.',
 	'ATI TECHNOLOGIES ULC',
@@ -29,5 +27,5 @@ export default [
 	'삼성전자(주)',
 	'소니코리아(주)',
 	'애플코리아 유한회사',
-	'엘지전자(주)'
+	'엘지전자(주)',
 ];

@@ -1,5 +1,3 @@
-'use strict';
-
 import request from 'request';
 import cheerio from 'cheerio';
 import encoding from 'encoding';
@@ -7,16 +5,20 @@ import encoding from 'encoding';
 import manufacturers from './manufacturers';
 
 class Parser {
-	static _getURL(date, page) {
-		return `http://rra.go.kr/ko/license/A_c_search_view.do?cpage=${page}&category=&fromdate=${date}&todate=${date}`;
+	_getURL(page) {
+		let self = this;
+
+		return `http://rra.go.kr/ko/license/A_c_search_view.do?cpage=${page}&category=&fromdate=${self.date}&todate=${self.date}`;
 	}
 
-	static _sendRequest(url) {
+	_sendRequest(url) {
+		let self = this;
+
 		return new Promise((resolve, reject) => {
 			request({
-				method: 'GET',
-				url: url,
-				encoding: 'binary'
+				'method': 'GET',
+				'url': url,
+				'encoding': 'binary',
 			}, (err, res, body) => {
 				if(!err && res.statusCode === 200) {
 					resolve(body);
@@ -28,65 +30,88 @@ class Parser {
 		});
 	}
 
-	static _parseItem($, e) {
-		let item = {};
-
-		try {
-			$(e).find('td').each((i, e) => {
-				let str = $(e).text().trim();
-
-				switch(i) {
-				case 0:
-					item.id = $(e).find('a').attr('href').split('=').pop();
-					item.manufacturer = str;
-					item.tweet = (manufacturers.indexOf(item.manufacturer) === -1 ? 2 : 0);
-
-					break;
-				case 1:
-					item.type = str;
-					break;
-				case 2:
-					item.model = str;
-					break;
-				case 4:
-					item.date = str;
-					break;
-				}
-			});
-		}
-		catch(err) {} // eslint-disable-line
-
-		return item;
-	}
-
-	static parse(date, page) {
+	_parsePage(page) {
 		let self = this;
 
-		let url = self._getURL(date, page);
+		let url = self._getURL(page);
 
 		return self._sendRequest(url)
 		.then((body) => {
 			let $ = cheerio.load(encoding.convert(body, 'utf-8', 'euc-kr'));
 
-			let items = [];
+			let count = 0;
 
-			$('table.thos_s tr').each((i, e) => {
+			$('table.thos_s tr')
+			.each((i, e) => {
 				if(i >= 2) {
 					let item = self._parseItem($, $(e));
 
 					if(Object.keys(item).length !== 0) {
-						items.push(item);
+						self.items.push(item);
+						++count;
 					}
 				}
 			});
 
-			return Promise.resolve({
-				items: items,
-				date: date,
-				page: page
-			});
-		})
-		.catch((err) => console.error(err));
+			if(count > 0) {
+				return self._parsePage(++page);
+			}
+			else {
+				return Promise.resolve(self.items);
+			}
+		});
+	}
+
+	_parseItem($, e) {
+		let self = this;
+
+		let item = {};
+
+		$(e)
+		.find('td')
+		.each((i, e) => {
+			let str = $(e)
+			.text()
+			.trim();
+
+			switch(i) {
+			case 0:
+				const t = $(e)
+				.find('a')
+				.attr('href');
+
+				if(t === undefined) {
+					return;
+				}
+
+				item.id = t.split('=')
+				.pop();
+				item.manufacturer = str;
+				item.tweet = (manufacturers.indexOf(item.manufacturer) === -1 ? 2 : 0);
+
+				break;
+			case 1:
+				item.type = str;
+				break;
+			case 2:
+				item.model = str;
+				break;
+			case 4:
+				item.date = str;
+				break;
+			}
+		});
+
+		return item;
+	}
+
+	parse(date) {
+		let self = this;
+
+		self.date = date;
+		self.items = [];
+
+		return self._parsePage(1);
 	}
 }
 

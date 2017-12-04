@@ -1,62 +1,64 @@
-'use strict';
-
 import Twit from 'twit';
-
-import Database from './database';
+import TwitterText from 'twitter-text';
 
 class Tweeter {
-	static composeTweet(device) {
-		let status = `[${device.date}]\n[${device.manufacturer}]\n[${device.model}]\n[${device.type}]\n`;
-		if(status.length > (140 - 22)) {
-			device.type = device.type.substr(0, device.type.length - (status.length - (140 - 22)) - 1);
-			device.type += '…';
-
-			status = `[${device.date}]\n[${device.manufacturer}]\n[${device.model}]\n[${device.type}]\n`;
-		}
-		status += `http://rra.go.kr/ko/license/A_b_popup.do?app_no=${device.id}`;
-
-		return status;
-	}
-
-	static _sendTweet(device) {
+	constructor(config) {
 		let self = this;
 
-		const status = self.composeTweet(device);
-
-		return new Promise((resolve) => {
-			self.twit.post('statuses/update', {
-				status: status
-			}, (err) => {
-				if(err) {
-					resolve(err);
-				}
-				else {
-					Database.update(device.id)
-					.then(() => {
-						resolve();
-					})
-					.catch((err) => {
-						resolve(err);
-					});
-				}
-			});
-		});
+		self.config = config;
 	}
 
-	static initialize(config) {
+	initialize() {
 		let self = this;
 
-		self.twit = new Twit(config);
+		self.twit = new Twit(self.config);
 
 		return Promise.resolve();
 	}
 
-	static tweet(devices) {
+	_composeTweet(device) {
 		let self = this;
 
-		return Promise.all(devices.map((device) => {
-			return self._sendTweet(device);
-		}));
+		let status = `[${device.date}]\n`;
+		status += `[${device.manufacturer}]\n`;
+		status += `[${device.model}]\n`;
+		status += `[${device.type}]\n`;
+		status += `http://rra.go.kr/ko/license/A_b_popup.do?app_no=${device.id}`;
+
+		let characterLeft = 140 - TwitterText.getTweetLength(status);
+		if(characterLeft < 0) {
+			device.type = device.type.substr(0, device.type.length + characterLeft - 1);
+			device.type += '…';
+
+			return self._composeTweet(device);
+		}
+
+		return status;
+	}
+
+	/* istanbul ignore next */
+	tweet(device) {
+		let self = this;
+
+		const status = self._composeTweet(device);
+
+		return new Promise((resolve, reject) => {
+			try {
+				self.twit.post('statuses/update', {
+					'status': status,
+				}, (err) => {
+					if(err) {
+						reject(err);
+					}
+					else {
+						resolve();
+					}
+				});
+			}
+			catch(err) {
+				reject(err);
+			}
+		});
 	}
 }
 

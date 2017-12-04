@@ -1,7 +1,6 @@
-'use strict';
-
 import path from 'path';
 
+import Promise from 'bluebird';
 import Sequelize from 'sequelize';
 
 import Database from './libs/database';
@@ -11,57 +10,58 @@ import Tweeter from './libs/tweeter';
 import CONFIG from '../config';
 
 import {
-	dateToString
+	dateToString,
 } from './utils';
 
 class App {
+	constructor() {
+		let self = this;
+
+		self.database = new Database({
+			'dialect': 'sqlite',
+			'operatorsAliases': Sequelize.Op,
+			'logging': false,
+			'storage': path.resolve(__dirname, '../database.sqlite'),
+		});
+		self.tweeter = new Tweeter(CONFIG);
+		self.parser = new Parser();
+	}
+
+	initialize() {
+		let self = this;
+
+		return Promise.all([
+			self.database.initialize(),
+			self.tweeter.initialize(),
+		]);
+	}
+
 	start() {
-		Promise.all([
-			Database.initialize({
-				dialect: 'sqlite',
-				operatorsAliases: Sequelize.Op,
-				logging: false,
-				storage: path.resolve(__dirname, '../database.sqlite')
-			}),
-			Tweeter.initialize(CONFIG)
-		])
+		let self = this;
+
+		const date = dateToString(new Date());
+
+		return self.parser.parse(date)
+		.then((items) => {
+			if(items.length > 0) {
+				return self.database.insert(items);
+			}
+			else {
+				return Promise.resolve();
+			}
+		})
 		.then(() => {
-			return Promise.resolve(0);
+			return self.database.select();
 		})
-		.then(function loop(i) {
-			console.log(i);
-
-			const dateString = dateToString(new Date());
-
-			return Parser.parse(dateString, 1)
-			.then(function loop(data) {
-				if(data.items.length > 0) {
-					return Database.insert(data.items)
-					.then(() => {
-						return Parser.parse(data.date, data.page + 1);
-					})
-					.then(loop)
-					.catch(err => console.error(err));
-				}
-			})
-			.then(() => {
-				return Database.select();
-			})
-			.then((devices) => {
-				return Tweeter.tweet(devices);
-			})
-			.then(() => {
-				setTimeout(() => {
-					loop(i + 1);
-				}, 5 * 60 * 1000);
-			})
-			.catch(err => console.error(err));
-		})
-		.catch(err => console.error(err));
+		.then((items) => {
+			return Promise.each(items, (item) => {
+				return self.tweeter.tweet(item)
+				.then(() => {
+					self.database.update(item);
+				});
+			});
+		});
 	}
 }
-
-let app = new App();
-app.start();
 
 export default App;
