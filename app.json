@@ -1,4 +1,4 @@
 {
   "name": "@rra_bot",
-  "script": "./dist/app.js"
+  "script": "./dist/main.js"
 }

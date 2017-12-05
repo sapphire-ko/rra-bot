@@ -3,11 +3,7 @@ module.exports = {
 		'eslint:recommended',
 	],
 	'root': true,
-	'parserOptions': {
-		'parser': 'babel-eslint',
-		'ecmaVersion': 6,
-		'sourceType': 'module',
-	},
+	'parser': 'babel-eslint',
 	'env': {
 		'es6': true,
 		'node': true,

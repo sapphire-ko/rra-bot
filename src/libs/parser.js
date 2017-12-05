@@ -2,7 +2,7 @@ import request from 'request';
 import cheerio from 'cheerio';
 import encoding from 'encoding';
 
-import manufacturers from './manufacturers';
+import manufacturers from '../manufacturers.txt';
 
 class Parser {
 	_getURL(page) {

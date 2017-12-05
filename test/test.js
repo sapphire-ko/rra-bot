@@ -5,11 +5,11 @@ import assert from 'assert';
 import Sequelize from 'sequelize';
 import TwitterText from 'twitter-text';
 
-import Database from '../src/libs/database';
-import Parser from '../src/libs/parser';
-import Tweeter from '../src/libs/tweeter';
+import Database from '../dist/database';
+import Parser from '../dist/parser';
+import Tweeter from '../dist/tweeter';
 
-import * as utils from '../src/utils';
+import * as utils from '../dist/utils';
 
 describe('@rra_bot', () => {
 	const item = {

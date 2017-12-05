@@ -2,16 +2,21 @@
   "name": "rra_bot",
   "version": "1.0.0",
   "description": "@rra_bot",
-  "main": "./src/app.js",
+  "main": "./dist/main.js",
   "scripts": {
-    "prestart": "webpack",
+    "build": "npm run build-prod",
+    "build-default": "babel-node ./webpack/build.js",
+    "build-prod": "cross-env NODE_ENV=prod npm run build-default",
+    "build-test": "cross-env NODE_ENV=test npm run build-default",
+    "prestart": "npm run build-prod",
     "start": "pm2 start ./app.json",
     "stop": "pm2 stop ./app.json",
     "dev": "babel-node ./src/main.js",
     "eslint": "eslint .",
+    "pretest": "npm run build-test",
     "test": "cross-env NODE_ENV=test mocha --require babel-core/register",
-    "test-coverage": "cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha ./test --require babel-core/register",
-    "coveralls": "npm run test-coverage && cat ./coverage/lcov.info | coveralls"
+    "coverage": "nyc --reporter=lcov --reporter=text npm run test",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
@@ -27,6 +32,7 @@
     "bluebird": "^3.5.1",
     "cheerio": "^1.0.0-rc.2",
     "encoding": "^0.1.12",
+    "file-loader": "^1.1.5",
     "request": "^2.83.0",
     "sequelize": "^4.26.0",
     "sqlite3": "^3.1.13",
@@ -36,16 +42,18 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.3",
     "babel-loader": "^7.1.2",
     "babel-plugin-istanbul": "^4.1.5",
-    "babel-plugin-transform-es2015-classes": "^6.24.1",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-3": "^6.24.1",
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.1",
     "eslint": "^4.12.1",
+    "list-loader": "^1.0.2",
     "mocha": "^4.0.1",
     "nyc": "^11.3.0",
-    "webpack": "^3.9.1",
+    "webpack": "^3.10.0",
     "webpack-node-externals": "^1.6.0"
   }
 }

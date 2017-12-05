@@ -42,11 +42,8 @@ class App {
 
 		const date = dateToString(new Date());
 
-		console.log(date);
-
 		return self.parser.parse(date)
 		.then((items) => {
-			console.log(items.length);
 			if(items.length > 0) {
 				return self.database.insert(items);
 			}
@@ -58,7 +55,6 @@ class App {
 			return self.database.select();
 		})
 		.then((items) => {
-			console.log(items.length);
 			return Promise.each(items, (item) => {
 				return self.tweeter.tweet(item)
 				.then(() => {

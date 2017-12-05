@@ -10,7 +10,7 @@ app.initialize()
 	.then(() => {
 		const d = new Date();
 		console.log(d.toString());
-		return Promise.delay(10 * 1000);
+		return Promise.delay(5 * 60 * 1000);
 	})
 	.then(loop);
 })
