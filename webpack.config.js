@@ -15,10 +15,6 @@ module.exports = {
 	'module': {
 		'loaders': [
 			{
-				'test': /\.json$/,
-				'loader': 'json',
-			},
-			{
 				'exclude': /node_modules/,
 				'test': /\.js$/,
 				'loader': 'babel-loader',

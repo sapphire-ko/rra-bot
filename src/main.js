@@ -1,21 +1,18 @@
-import schedule from 'node-schedule';
+/* istanbul ignore file */
+import Promise from 'bluebird';
 
 import App from './app';
 
-/* istanbul ignore next */
 const app = new App();
 app.initialize()
-.then(() => {
-	schedule.scheduleJob('*/5 * * * *', () => {
-		app.start()
-		.then(() => {
-			const d = new Date();
-			console.log(d.toString());
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-	});
+.then(function loop() {
+	return app.start()
+	.then(() => {
+		const d = new Date();
+		console.log(d.toString());
+		return Promise.delay(10 * 1000);
+	})
+	.then(loop);
 })
 .catch((err) => {
 	console.log(err);
