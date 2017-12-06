@@ -58,7 +58,7 @@ class App {
 			return Promise.each(items, (item) => {
 				return self.tweeter.tweet(item)
 				.then(() => {
-					self.database.update(item);
+					return self.database.update(item);
 				});
 			});
 		});
