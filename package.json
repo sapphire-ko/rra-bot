@@ -55,5 +55,8 @@
     "nyc": "^11.4.0",
     "webpack": "^3.10.0",
     "webpack-node-externals": "^1.6.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "^1.1.3"
   }
 }
