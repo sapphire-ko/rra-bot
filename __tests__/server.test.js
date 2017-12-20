@@ -5,11 +5,13 @@ import assert from 'assert';
 import Sequelize from 'sequelize';
 import TwitterText from 'twitter-text';
 
-import Database from '../dist/database';
-import Parser from '../dist/parser';
-import Tweeter from '../dist/tweeter';
+import Database from '../src/libs/database';
+import Parser from '../src/libs/parser';
+import Tweeter from '../src/libs/tweeter';
 
-import * as utils from '../dist/utils';
+import * as utils from '../src/utils';
+
+jest.setTimeout(60000);
 
 describe('@rra_bot', () => {
 	const item = {
@@ -30,7 +32,7 @@ describe('@rra_bot', () => {
 			'storage': databasePath,
 		});
 
-		before((done) => {
+		beforeAll((done) => {
 			database.initialize()
 			.then(() => {
 				done();
@@ -67,7 +69,7 @@ describe('@rra_bot', () => {
 			});
 		});
 
-		after(() => {
+		afterAll(() => {
 			fs.unlinkSync(databasePath);
 		});
 	});
@@ -76,8 +78,6 @@ describe('@rra_bot', () => {
 		const parser = new Parser();
 
 		it('parse valid', function(done) {
-			this.timeout(100000);
-
 			parser.parse('20161111')
 			.then((items) => {
 				assert.equal(items.length, 142);
@@ -95,8 +95,6 @@ describe('@rra_bot', () => {
 		});
 
 		it('parse invalid', function(done) {
-			this.timeout(100000);
-
 			parser.parse('20161112', 1)
 			.then((items) => {
 				assert.equal(items.length, 0);
@@ -120,7 +118,7 @@ describe('@rra_bot', () => {
 			'access_token_secret': 'invalid_key',
 		});
 
-		before((done) => {
+		beforeAll((done) => {
 			tweeter.initialize()
 			.then(() => {
 				done();

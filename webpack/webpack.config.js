@@ -1,9 +1,12 @@
+import path from 'path';
+
 import nodeExternals from 'webpack-node-externals';
 
 export default {
-	'target': 'node',
-	'node': {
-		'__dirname': true,
+	'entry': './src/main',
+	'output': {
+		'path': path.resolve(__dirname, '../dist'),
+		'filename': '[name].js',
 	},
 	'module': {
 		'rules': [
@@ -16,6 +19,10 @@ export default {
 				'loader': 'list-loader',
 			},
 		],
+	},
+	'target': 'node',
+	'node': {
+		'__dirname': true,
 	},
 	'externals': [
 		nodeExternals({

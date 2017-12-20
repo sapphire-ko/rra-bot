@@ -1,11 +1,6 @@
 import webpack from 'webpack';
 
-import webpackConfigProd from './webpack.config.prod';
-import webpackConfigTest from './webpack.config.test';
-
-const env = process.env.NODE_ENV || 'prod';
-
-const config = (env === 'test' ? webpackConfigTest : webpackConfigProd);
+import config from './webpack.config';
 
 webpack(config, (err, stats) => {
 	if(err) {

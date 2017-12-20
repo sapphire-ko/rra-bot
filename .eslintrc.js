@@ -7,8 +7,7 @@ module.exports = {
 	'env': {
 		'es6': true,
 		'node': true,
-		'browser': true,
-		'mocha': true,
+		'jest': true,
 	},
 	'rules': {
 		'indent': [
@@ -91,7 +90,7 @@ module.exports = {
 		'newline-per-chained-call': [
 			'error',
 			{
-				'ignoreChainWithDepth': 1,
+				'ignoreChainWithDepth': 2,
 			},
 		],
 		'no-multiple-empty-lines': [
@@ -137,6 +136,12 @@ module.exports = {
 					},
 					'as': {
 						'before': true,
+					},
+					'case': {
+						'after': true,
+					},
+					'export': {
+						'after': true,
 					},
 				},
 			},
