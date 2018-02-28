@@ -2,7 +2,6 @@
 import path from 'path';
 
 import Promise from 'bluebird';
-import Sequelize from 'sequelize';
 
 import Database from './libs/database';
 import Parser from './libs/parser';
@@ -18,13 +17,8 @@ class App {
 	constructor() {
 		let self = this;
 
-		self.database = new Database({
-			'dialect': 'sqlite',
-			'operatorsAliases': Sequelize.Op,
-			'logging': false,
-			'storage': path.resolve(__dirname, '../database.sqlite'),
-		});
-		self.tweeter = new Tweeter(CONFIG);
+		self.database = new Database(CONFIG.knex);
+		self.tweeter = new Tweeter(CONFIG.twitter);
 		self.parser = new Parser();
 	}
 

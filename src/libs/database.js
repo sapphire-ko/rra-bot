@@ -1,9 +1,9 @@
 import Promise from 'bluebird';
-import Sequelize from 'sequelize';
+import Knex from 'knex';
 
 import Device from '../models/device';
 
-const Op = Sequelize.Op;
+const TABLE_NAME = 'rra_bot';
 
 class Database {
 	constructor(config) {
@@ -15,30 +15,34 @@ class Database {
 	initialize() {
 		let self = this;
 
-		self.database = {};
+		self.knex = new Knex(self.config);
 
-		const sequelize = new Sequelize(self.config);
-
-		self.database.device = sequelize.import('device', Device);
-
-		return self.database.device.sync()
-		.then(() => {
-			self._isInitialized = true;
-
-			return Promise.resolve();
+		return self.knex.schema.hasTable(TABLE_NAME).then((exists) => {
+			if(exists) {
+				return Promise.resolve();
+			}
+			return self.knex.schema.createTable(TABLE_NAME, (table) => {
+				table.string('id').primary().notNullable();
+				table.string('date').notNullable();
+				table.string('type').notNullable();
+				table.string('model').notNullable();
+				table.string('manufacturer').notNullable();
+				table.integer('tweet', 1).notNullable();
+				table.timestamp('created_at').defaultTo(self.knex.fn.now());
+			});
 		});
 	}
 
 	_insertItem(item) {
 		let self = this;
 
-		return self.database.device.findOrCreate({
-			'where': {
-				'id': {
-					[Op.eq]: item.id,
-				},
-			},
-			'defaults': item,
+		return self.knex(TABLE_NAME).where({
+			'id': item.id,
+		}).then((rows) => {
+			if(rows.length === 0) {
+				return self.knex(TABLE_NAME).insert(item);
+			}
+			return Promise.resolve();
 		});
 	}
 
@@ -53,26 +57,20 @@ class Database {
 	select() {
 		let self = this;
 
-		return self.database.device.findAll({
-			'where': {
-				'tweet': {
-					[Op.eq]: 0,
-				},
-			},
+		return self.knex(TABLE_NAME).where({
+			'tweet': 0,
+		}).then((rows) => {
+			return Promise.resolve(rows);
 		});
 	}
 
 	update(item) {
 		let self = this;
 
-		return self.database.device.update({
+		return self.knex(TABLE_NAME).where({
+			'id': item.id,
+		}).update({
 			'tweet': 1,
-		}, {
-			'where': {
-				'id': {
-					[Op.eq]: item.id,
-				},
-			},
 		});
 	}
 }

@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import assert from 'assert';
 
-import Sequelize from 'sequelize';
 import TwitterText from 'twitter-text';
 
 import Database from '../src/libs/database';
@@ -24,12 +23,13 @@ describe('@rra_bot', () => {
 	};
 
 	describe('database', () => {
-		const databasePath = path.resolve(__dirname, '../database.test.sqlite');
+		const databasePath = path.resolve(__dirname, '../rra_bot.test.sqlite');
 		const database = new Database({
-			'dialect': 'sqlite',
-			'operatorsAliases': Sequelize.Op,
-			'logging': false,
-			'storage': databasePath,
+			'client': 'sqlite3',
+			'connection': {
+				'filename': databasePath,
+			},
+			'useNullAsDefault': true,
 		});
 
 		beforeAll((done) => {

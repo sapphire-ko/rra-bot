@@ -8,7 +8,7 @@
     "prestart": "npm run build",
     "start": "pm2 start ./app.json",
     "stop": "pm2 stop ./app.json",
-    "dev": "babel-node ./src/main.js",
+    "dev": "npm run build && node ./dist/main.js",
     "eslint": "eslint .",
     "pretest": "npm run build",
     "test": "jest",
@@ -29,8 +29,8 @@
     "bluebird": "^3.5.1",
     "cheerio": "^1.0.0-rc.2",
     "encoding": "^0.1.12",
+    "knex": "^0.14.4",
     "request": "^2.83.0",
-    "sequelize": "^4.27.0",
     "sqlite3": "^3.1.13",
     "twit": "^2.2.9"
   },
