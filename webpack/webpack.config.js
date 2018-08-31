@@ -29,4 +29,5 @@ export default {
 			'modulesFromFile': true,
 		}),
 	],
+	'mode': process.env.NODE_ENV === 'dev' ? 'development' : 'production',
 };
