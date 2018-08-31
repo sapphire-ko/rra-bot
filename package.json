@@ -47,7 +47,7 @@
     "eslint": "^5.4.0",
     "file-loader": "^2.0.0",
     "jest": "^23.5.0",
-    "list-loader": "^1.0.8",
+    "list-loader": "^1.0.9",
     "twitter-text": "^2.0.4",
     "webpack": "^4.17.1",
     "webpack-node-externals": "^1.7.2"
