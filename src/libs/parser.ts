@@ -45,6 +45,7 @@ export class Parser {
 			if(i >= 2) {
 				const item = this.parseItem($, $(e));
 
+				/* istanbul ignore else */
 				if(item !== null) {
 					this.items.push(item);
 					++count;
@@ -78,8 +79,9 @@ export class Parser {
 			};
 		}
 		catch(err) {
+			/* istanbul ignore next */
 			console.log(err);
-
+			/* istanbul ignore next */
 			return null;
 		}
 	}

@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import Twit from 'twit';
 
 import {
@@ -22,7 +23,6 @@ export class Tweeter {
 		return Promise.resolve();
 	}
 
-	/* istanbul ignore next */
 	public tweet(item: Item) {
 		const status = composeTweet(item);
 

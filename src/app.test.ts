@@ -5,7 +5,6 @@ import assert from 'assert';
 import {
 	Database,
 	Parser,
-	Tweeter,
 } from '../src/libs';
 
 import {
@@ -73,19 +72,6 @@ describe('@rra_bot', () => {
 		it('parse invalid', async () => {
 			const items = await parser.parse('20180805');
 			assert.equal(items.length, 0);
-		});
-	});
-
-	describe('tweeter', () => {
-		const tweeter = new Tweeter({
-			'consumer_key': 'invalid_key',
-			'consumer_secret': 'invalid_key',
-			'access_token': 'invalid_key',
-			'access_token_secret': 'invalid_key',
-		});
-
-		beforeAll(async () => {
-			await tweeter.initialize();
 		});
 	});
 

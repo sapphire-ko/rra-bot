@@ -1,5 +1,9 @@
 import Knex from 'knex';
 
+import {
+	Item,
+} from '../models';
+
 const TABLE_NAME = 'rra_bot';
 
 export class Database {
@@ -10,34 +14,35 @@ export class Database {
 		this.config = config;
 	}
 
-	public initialize() {
+	public async initialize() {
 		this.knex = Knex(this.config);
 
-		return this.knex.schema.hasTable(TABLE_NAME).then((exists) => {
-			if(exists) {
-				return Promise.resolve();
-			}
-			return this.knex.schema.createTable(TABLE_NAME, (table) => {
-				table.string('id').primary().notNullable();
-				table.string('date').notNullable();
-				table.string('type').notNullable();
-				table.string('model').notNullable();
-				table.string('manufacturer').notNullable();
-				table.integer('tweet').notNullable();
-				table.timestamp('created_at').defaultTo(this.knex.fn.now());
-			});
+		const exists = await this.knex.schema.hasTable(TABLE_NAME);
+
+		/* istanbul ignore if */
+		if(exists) {
+			return;
+		}
+		await this.knex.schema.createTable(TABLE_NAME, (table) => {
+			table.string('id').primary().notNullable();
+			table.string('date').notNullable();
+			table.string('type').notNullable();
+			table.string('model').notNullable();
+			table.string('manufacturer').notNullable();
+			table.integer('tweet').notNullable();
+			table.timestamp('created_at').defaultTo(this.knex.fn.now());
 		});
 	}
 
-	private insertItem(item) {
-		return this.knex(TABLE_NAME).where({
+	private async insertItem(item) {
+		const rows = await this.knex(TABLE_NAME).where({
 			'id': item.id,
-		}).then((rows) => {
-			if(rows.length === 0) {
-				return this.knex(TABLE_NAME).insert(item);
-			}
-			return Promise.resolve();
 		});
+
+		/* istanbul ignore else */
+		if(rows.length === 0) {
+			await this.knex(TABLE_NAME).insert(item);
+		}
 	}
 
 	public async insert(items) {
@@ -46,16 +51,14 @@ export class Database {
 		}
 	}
 
-	public select() {
-		return this.knex(TABLE_NAME).where({
+	public async select(): Promise<Item[]> {
+		return await this.knex(TABLE_NAME).where({
 			'tweet': 0,
-		}).then((rows) => {
-			return Promise.resolve(rows);
 		});
 	}
 
-	public update(item) {
-		return this.knex(TABLE_NAME).where({
+	public async update(item) {
+		return await this.knex(TABLE_NAME).where({
 			'id': item.id,
 		}).update({
 			'tweet': 1,
