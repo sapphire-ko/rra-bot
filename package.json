@@ -4,16 +4,16 @@
   "description": "@rra_bot",
   "main": "./dist/main.js",
   "scripts": {
-    "build": "babel-node ./webpack/build.js",
+    "build": "webpack",
     "prestart": "npm run build",
     "start": "pm2 start ./app.json",
     "stop": "pm2 stop ./app.json",
-    "dev": "npm run build && node ./dist/main.js",
-    "eslint": "eslint .",
+    "dev": "node ./dist/main.js",
     "pretest": "npm run build",
     "test": "jest",
     "coverage": "jest --coverage",
-    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls"
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
+    "lint": "tslint -p ./tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/sapphiredev/rra_bot#readme",
   "dependencies": {
-    "bluebird": "^3.5.1",
     "cheerio": "^1.0.0-rc.2",
     "encoding": "^0.1.12",
     "knex": "^0.15.2",
@@ -35,26 +34,41 @@
     "twit": "^2.2.11"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "babel-cli": "^6.26.0",
-    "babel-eslint": "^9.0.0",
-    "babel-jest": "^23.4.2",
-    "babel-loader": "^8.0.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-3": "^6.24.1",
+    "@types/cheerio": "^0.22.9",
+    "@types/jest": "^23.3.1",
+    "@types/knex": "^0.14.23",
+    "@types/node-fetch": "^2.1.2",
+    "@types/twit": "^2.2.19",
+    "@types/twitter-text": "^2.0.0",
     "coveralls": "^3.0.2",
     "cross-env": "^5.2.0",
-    "eslint": "^5.4.0",
-    "file-loader": "^2.0.0",
     "jest": "^23.5.0",
     "list-loader": "^1.0.9",
+    "node-fetch": "^2.2.0",
+    "ts-jest": "^23.1.4",
+    "ts-loader": "^5.0.0",
+    "tslint": "^5.11.0",
     "twitter-text": "^2.0.4",
+    "typescript": "^3.0.3",
     "webpack": "^4.17.1",
+    "webpack-command": "^0.4.1",
     "webpack-node-externals": "^1.7.2"
   },
   "jest": {
+    "testMatch": [
+      "**/?(*.)test.ts?(x)"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
     "moduleNameMapper": {
-      "\\.txt$": "<rootDir>/__mocks__/listMock.js"
-    }
+      "\\.txt$": "<rootDir>/src/list.mock.ts"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "ts",
+      "tsx",
+      "json"
+    ]
   }
 }
