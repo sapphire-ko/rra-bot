@@ -8,6 +8,10 @@ import {
 	Item,
 } from '../models';
 
+import {
+	printLog,
+} from '../helpers';
+
 import manufacturers from '../manufacturers.txt';
 
 export class Parser {
@@ -33,7 +37,7 @@ export class Parser {
 	private async parsePage(page) {
 		const url = this.getURL(page);
 
-		console.log(url);
+		printLog(url);
 
 		const body = await this.sendRequest(url);
 

@@ -4,6 +4,10 @@ import {
 	Item,
 } from '../models';
 
+import {
+	printLog,
+} from '../helpers';
+
 const TABLE_NAME = 'rra_bot';
 
 export class Database {
@@ -34,34 +38,54 @@ export class Database {
 		});
 	}
 
-	private async insertItem(item) {
+	private async insertItem(item: Item) {
+		printLog(`insert item: ${item.model}`);
+
 		const rows = await this.knex(TABLE_NAME).where({
 			'id': item.id,
 		});
+
+		printLog(`rows: ${rows.length}`);
 
 		/* istanbul ignore else */
 		if(rows.length === 0) {
 			await this.knex(TABLE_NAME).insert(item);
 		}
+
+		printLog('insert item ended');
 	}
 
-	public async insert(items) {
+	public async insert(items: Item[]) {
+		printLog(`insert items: ${items.length}`);
+
 		for(const item of items) {
 			await this.insertItem(item);
 		}
+
+		printLog(`insert items ended`);
 	}
 
 	public async select(): Promise<Item[]> {
-		return await this.knex(TABLE_NAME).where({
+		printLog('select');
+
+		const items = await this.knex(TABLE_NAME).where({
 			'tweet': 0,
 		});
+
+		printLog(`select ended: ${items.length}`);
+
+		return items;
 	}
 
-	public async update(item) {
-		return await this.knex(TABLE_NAME).where({
+	public async update(item: Item) {
+		printLog(`update: ${item.model}`);
+
+		await this.knex(TABLE_NAME).where({
 			'id': item.id,
 		}).update({
 			'tweet': 1,
 		});
+
+		printLog('update ended');
 	}
 }

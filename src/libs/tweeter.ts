@@ -7,6 +7,7 @@ import {
 
 import {
 	composeTweet,
+	printLog,
 } from '../helpers';
 
 export class Tweeter {
@@ -17,16 +18,16 @@ export class Tweeter {
 		this.config = config;
 	}
 
-	public initialize() {
+	public async initialize() {
 		this.twit = new Twit(this.config);
-
-		return Promise.resolve();
 	}
 
-	public tweet(item: Item) {
+	public async tweet(item: Item) {
+		printLog(`tweet: ${item.model}`);
+
 		const status = composeTweet(item);
 
-		return new Promise((resolve, reject) => {
+		await new Promise((resolve, reject) => {
 			this.twit.post('statuses/update', {
 				'status': status,
 			}, (err) => {
@@ -38,5 +39,7 @@ export class Tweeter {
 				}
 			});
 		});
+
+		printLog('tweet ended');
 	}
 }
