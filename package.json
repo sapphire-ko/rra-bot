@@ -4,12 +4,11 @@
   "description": "https://twitter.com/rra_bot",
   "main": "./src/index.ts",
   "scripts": {
+    "clean": "rm -fr ./dist",
+    "prebuild": "npm run clean",
     "build": "webpack",
     "prestart": "npm run build",
-    "start": "pm2 start ./app.json",
-    "stop": "pm2 stop ./app.json",
-    "dev": "node ./dist/main.js",
-    "pretest": "npm run build",
+    "start": "node ./dist/main.js",
     "lint": "tslint -p ./tsconfig.json",
     "test": "jest --coverage"
   },
@@ -27,10 +26,8 @@
     "cheerio": "^1.0.0-rc.2",
     "iconv-lite": "^0.5.0",
     "ioredis": "^4.14.1",
-    "knex": "^0.19.5",
     "lodash": "^4.17.15",
     "request": "^2.88.0",
-    "sqlite3": "^4.1.0",
     "twit": "^2.2.11"
   },
   "devDependencies": {
@@ -39,11 +36,9 @@
     "@types/ioredis": "^4.0.18",
     "@types/ioredis-mock": "github:5minlab/types-ioredis-mock",
     "@types/jest": "^24.0.19",
-    "@types/knex": "^0.16.1",
     "@types/lodash": "^4.14.144",
     "@types/node-fetch": "^2.5.2",
     "@types/twit": "^2.2.23",
-    "@types/twitter-text": "^2.0.0",
     "codecov": "^3.6.1",
     "cross-env": "^6.0.3",
     "faker": "^4.1.0",
@@ -54,10 +49,9 @@
     "ts-jest": "^24.1.0",
     "ts-loader": "^6.2.0",
     "tslint": "^5.20.0",
-    "twitter-text": "^3.0.0",
     "typescript": "^3.6.4",
     "webpack": "^4.41.2",
-    "webpack-command": "^0.5.0",
+    "webpack-cli": "^3.3.9",
     "webpack-node-externals": "^1.7.2"
   }
 }
