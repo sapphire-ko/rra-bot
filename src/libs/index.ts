@@ -1,3 +1,3 @@
-export * from './database';
-export * from './parser';
+export * from './Database';
+export * from './Parser';
 export * from './Tweeter';
