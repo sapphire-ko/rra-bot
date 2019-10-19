@@ -16,11 +16,10 @@ export class Tweeter {
 
 	constructor(config: Twit.ConfigKeys) {
 		this.config = config;
-	}
-
-	public async initialize() {
 		this.twit = new Twit(this.config);
 	}
+
+	public async initialize() { }
 
 	public async tweet(item: Item) {
 		printLog(`tweet: ${item.model}`);
@@ -30,8 +29,8 @@ export class Tweeter {
 		await new Promise((resolve, reject) => {
 			this.twit.post('statuses/update', {
 				'status': status,
-			}, (err) => {
-				if(err) {
+			}, err => {
+				if (err) {
 					reject(err);
 				}
 				else {

@@ -2,7 +2,7 @@ import https from 'https';
 
 import fetch from 'node-fetch';
 import cheerio from 'cheerio';
-import encoding from 'encoding';
+import iconv from 'iconv-lite';
 
 import {
 	Item,
@@ -15,14 +15,14 @@ import {
 import manufacturers from '../manufacturers.txt';
 
 export class Parser {
-	private date: string;
-	private items: Item[];
+	private date: string = '';
+	private items: Item[] = [];
 
-	private getURL(page) {
+	private getURL(page: number) {
 		return `https://rra.go.kr/ko/license/A_c_search_view.do?cpage=${page}&category=&fromdate=${this.date}&todate=${this.date}`;
 	}
 
-	private async sendRequest(url) {
+	private async sendRequest(url: string) {
 		const agent = new https.Agent({
 			'rejectUnauthorized': false,
 		});
@@ -34,23 +34,23 @@ export class Parser {
 		return res.arrayBuffer();
 	}
 
-	private async parsePage(page) {
+	private async parsePage(page: number) {
 		const url = this.getURL(page);
 
 		printLog(url);
 
 		const body = await this.sendRequest(url);
 
-		const $ = cheerio.load(encoding.convert(Buffer.from(body), 'utf-8', 'euc-kr'));
+		const $ = cheerio.load(iconv.decode(Buffer.from(body), 'euc-kr'));
 
 		let count = 0;
 
 		$('table:first-child tr').each((i, e) => {
-			if(i >= 2) {
+			if (i >= 2) {
 				const item = this.parseItem($, $(e));
 
 				/* istanbul ignore else */
-				if(item !== null) {
+				if (item !== null) {
 					this.items.push(item);
 					++count;
 				}
@@ -60,37 +60,28 @@ export class Parser {
 		return count;
 	}
 
-	private parseItem($, e): Item {
+	private parseItem($: CheerioStatic, e: Cheerio): Item | null {
 		try {
 			const column = $(e).find('td').toArray();
 
 			const link = $(column[0]).find('a').attr('href');
 
-			const id = link.split('=').pop();
+			const id = link.split('=').pop()!;
 			const manufacturer = $(column[0]).text().trim();
 			const tweet = manufacturers.indexOf(manufacturer) === -1 ? 2 : 0;
 			const type = $(column[1]).text().trim();
 			const model = $(column[2]).text().trim();
 			const date = $(column[4]).text().trim();
 
-			return {
-				'id': id,
-				'type': type,
-				'date': date,
-				'manufacturer': manufacturer,
-				'model': model,
-				'tweet': tweet,
-			};
+			return { id, type, date, manufacturer, model, tweet };
 		}
-		catch(err) {
-			/* istanbul ignore next */
-			console.log(err);
-			/* istanbul ignore next */
+		catch (error) {
+			console.log(error);
 			return null;
 		}
 	}
 
-	public async parse(date) {
+	public async parse(date: string) {
 		this.date = date;
 		this.items = [];
 
@@ -99,7 +90,7 @@ export class Parser {
 		do {
 			count = await this.parsePage(++page);
 		}
-		while(count > 0);
+		while (count > 0);
 
 		return this.items;
 	}

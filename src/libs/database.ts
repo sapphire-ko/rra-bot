@@ -16,18 +16,17 @@ export class Database {
 
 	constructor(config: Knex.Config) {
 		this.config = config;
+		this.knex = Knex(this.config);
 	}
 
 	public async initialize() {
-		this.knex = Knex(this.config);
-
 		const exists = await this.knex.schema.hasTable(TABLE_NAME);
 
 		/* istanbul ignore if */
 		if(exists) {
 			return;
 		}
-		await this.knex.schema.createTable(TABLE_NAME, (table) => {
+		await this.knex.schema.createTable(TABLE_NAME, table => {
 			table.string('id').primary().notNullable();
 			table.string('date').notNullable();
 			table.string('type').notNullable();
