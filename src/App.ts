@@ -3,17 +3,20 @@ import schedule from 'node-schedule';
 import {
 	Database,
 	Parser,
+	Server,
 	Tweeter,
 } from '~/libs';
 
 export class App {
 	private database: Database;
 	private parser: Parser;
+	private server: Server;
 	private tweeter: Tweeter;
 
 	constructor() {
 		this.database = new Database();
 		this.parser = new Parser();
+		this.server = new Server();
 		this.tweeter = new Tweeter(__config.twitter);
 	}
 
