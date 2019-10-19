@@ -1,8 +1,10 @@
+import schedule from 'node-schedule';
+
 import {
 	Database,
 	Parser,
 	Tweeter,
-} from './libs';
+} from '~/libs';
 
 export class App {
 	private database: Database;
@@ -11,26 +13,32 @@ export class App {
 
 	constructor() {
 		this.database = new Database();
-		this.tweeter = new Tweeter(__config.twitter);
 		this.parser = new Parser();
+		this.tweeter = new Tweeter(__config.twitter);
+	}
+
+	private async parse(date: Date): Promise<void> {
+		const items = await this.parser.parse(date);
+		for (const item of items) {
+			await this.database.insertItem(item);
+		}
+	}
+
+	private async tweet(): Promise<void> {
+		const items = await this.database.getItems();
+		for (const item of items) {
+			await this.tweeter.tweetItem(item);
+			await this.database.updateItem(item);
+		}
 	}
 
 	public async start() {
-		const date = new Date();
+		schedule.scheduleJob('*/5 * * * *', async () => {
+			const date = new Date();
+			console.log('parse', date);
 
-		{
-			const items = await this.parser.parse(date);
-			for (const item of items) {
-				await this.database.insertItem(item);
-			}
-		}
-
-		{
-			const items = await this.database.getItems();
-			for (const item of items) {
-				await this.tweeter.tweetItem(item);
-				await this.database.updateItem(item);
-			}
-		}
+			await this.parse(date);
+			await this.tweet();
+		});
 	}
 }
