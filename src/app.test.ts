@@ -65,8 +65,8 @@ describe('@rra_bot', () => {
 
 		it('parse valid', async () => {
 			const items = await parser.parse('20180802');
-			assert.equal(items.length, 169);
-			assert.equal(items[0].id, '201817210000186305');
+			assert.equal(items.length, 158);
+			assert.equal(items[0].id, '201817210000184911');
 		});
 
 		it('parse invalid', async () => {

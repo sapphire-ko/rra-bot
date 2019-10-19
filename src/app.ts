@@ -6,7 +6,6 @@ import {
 
 import {
 	dateToString,
-	printLog,
 } from './helpers';
 
 export class App {
@@ -21,32 +20,25 @@ export class App {
 	}
 
 	public async initialize() {
-		await this.database.initialize(),
-		await this.tweeter.initialize();
+		await this.database.initialize();
 	}
 
 	public async start() {
-		printLog('start');
-
 		const date = dateToString(new Date());
 
 		{
 			const items = await this.parser.parse(date);
-			printLog(`items: ${items.length}`);
-			if(items.length > 0) {
+			if (items.length > 0) {
 				await this.database.insert(items);
 			}
 		}
 
 		{
 			const items = await this.database.select();
-			printLog(`items selected: ${items.length}`);
-			for(const item of items) {
-				await this.tweeter.tweet(item);
+			for (const item of items) {
+				await this.tweeter.tweetItem(item);
 				await this.database.update(item);
 			}
 		}
-
-		printLog('start ended');
 	}
 }

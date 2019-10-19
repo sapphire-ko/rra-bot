@@ -8,7 +8,8 @@ module.exports = {
 		'__test': true,
 	},
     moduleNameMapper: {
-      '~/(.*)': '<rootDir>/src/$1'
+	  '~/(.*)': '<rootDir>/src/$1',
+      '\\.txt$': '<rootDir>/src/list.mock.ts',
     },
 	rootDir: '.',
 	collectCoverageFrom: [
