@@ -1,90 +1,85 @@
-import Knex from 'knex';
+import _ from 'lodash';
+
+import IORedis from 'ioredis';
+
+import IORedisMock from 'ioredis-mock';
 
 import {
 	Item,
-} from '../models';
+} from '~/models';
 
 import {
-	printLog,
-} from '../helpers';
-
-const TABLE_NAME = 'rra_bot';
+	serializeItem,
+	deserializeItem,
+} from '~/helpers';
 
 export class Database {
-	private config: Knex.Config;
-	private knex: Knex;
+	private readonly redis: IORedis.Redis;
 
-	constructor(config: Knex.Config) {
-		this.config = config;
-		this.knex = Knex(this.config);
-	}
-
-	public async initialize() {
-		const exists = await this.knex.schema.hasTable(TABLE_NAME);
-
-		/* istanbul ignore if */
-		if(exists) {
-			return;
+	public constructor() {
+		if (__test) {
+			this.redis = new IORedisMock();
 		}
-		await this.knex.schema.createTable(TABLE_NAME, table => {
-			table.string('id').primary().notNullable();
-			table.string('date').notNullable();
-			table.string('type').notNullable();
-			table.string('model').notNullable();
-			table.string('manufacturer').notNullable();
-			table.integer('tweet').notNullable();
-			table.timestamp('created_at').defaultTo(this.knex.fn.now());
-		});
-	}
-
-	private async insertItem(item: Item) {
-		printLog(`insert item: ${item.model}`);
-
-		const rows = await this.knex(TABLE_NAME).where({
-			'id': item.id,
-		});
-
-		printLog(`rows: ${rows.length}`);
-
-		/* istanbul ignore else */
-		if(rows.length === 0) {
-			await this.knex(TABLE_NAME).insert(item);
+		else {
+			this.redis = new IORedis(process.env.REDIS_HOST);
 		}
-
-		printLog('insert item ended');
 	}
 
-	public async insert(items: Item[]) {
-		printLog(`insert items: ${items.length}`);
+	public get key() {
+		return 'rra_bot';
+	}
 
-		for(const item of items) {
-			await this.insertItem(item);
+	public async flush() {
+		await this.redis.flushall();
+	}
+
+	public async getItem(id: string): Promise<Item | null> {
+		const res = await this.redis.hget(this.key, id);
+
+		if (res === null) {
+			return null;
+		}
+		return deserializeItem(res);
+	}
+
+	public async getItems(): Promise<Item[]> {
+		const res: { [key: string]: string; } = await this.redis.hgetall(this.key);
+
+		const items = Object.values(res).map(x => deserializeItem(x));
+		return items.filter((x): x is Item => x !== null);
+	}
+
+	public async insertItem(nextItem: Item): Promise<boolean> {
+		const id = nextItem.id;
+
+		const prevItem = await this.getItem(id);
+		if (prevItem !== null) {
+			return false;
 		}
 
-		printLog(`insert items ended`);
+		const value = serializeItem(nextItem);
+		await this.redis.hset(this.key, nextItem.id, value);
+
+		return true;
 	}
 
-	public async select(): Promise<Item[]> {
-		printLog('select');
+	public async updateItem(nextItem: Item): Promise<boolean> {
+		const id = nextItem.id;
 
-		const items = await this.knex(TABLE_NAME).where({
-			'tweet': 0,
-		});
+		const prevItem = await this.getItem(id);
+		if (prevItem === null) {
+			return false;
+		}
+		if (prevItem.tweet === 1) {
+			return false;
+		}
+		if (_.isEqual(prevItem, nextItem)) {
+			return false;
+		}
 
-		printLog(`select ended: ${items.length}`);
+		const value = serializeItem(nextItem);
+		await this.redis.hset(this.key, nextItem.id, value);
 
-		return items;
-	}
-
-	public async update(item: Item) {
-		printLog(`update: ${item.model}`);
-
-		await this.knex(TABLE_NAME).where({
-			'id': item.id,
-		}).update({
-			'tweet': 1,
-		});
-
-		printLog('update ended');
+		return true;
 	}
 }

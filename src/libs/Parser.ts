@@ -9,7 +9,7 @@ import {
 } from '../models';
 
 import {
-	printLog,
+	getDateString,
 } from '../helpers';
 
 import manufacturers from '../manufacturers.txt';
@@ -36,8 +36,6 @@ export class Parser {
 
 	private async parsePage(page: number) {
 		const url = this.getURL(page);
-
-		printLog(url);
 
 		const body = await this.sendRequest(url);
 
@@ -81,8 +79,8 @@ export class Parser {
 		}
 	}
 
-	public async parse(date: string) {
-		this.date = date;
+	public async parse(date: Date) {
+		this.date = getDateString(date);
 		this.items = [];
 
 		let page = 0;

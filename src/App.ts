@@ -4,40 +4,32 @@ import {
 	Tweeter,
 } from './libs';
 
-import {
-	dateToString,
-} from './helpers';
-
 export class App {
 	private database: Database;
 	private parser: Parser;
 	private tweeter: Tweeter;
 
 	constructor() {
-		this.database = new Database(__config.knex);
+		this.database = new Database();
 		this.tweeter = new Tweeter(__config.twitter);
 		this.parser = new Parser();
 	}
 
-	public async initialize() {
-		await this.database.initialize();
-	}
-
 	public async start() {
-		const date = dateToString(new Date());
+		const date = new Date();
 
 		{
 			const items = await this.parser.parse(date);
-			if (items.length > 0) {
-				await this.database.insert(items);
+			for (const item of items) {
+				await this.database.insertItem(item);
 			}
 		}
 
 		{
-			const items = await this.database.select();
+			const items = await this.database.getItems();
 			for (const item of items) {
 				await this.tweeter.tweetItem(item);
-				await this.database.update(item);
+				await this.database.updateItem(item);
 			}
 		}
 	}

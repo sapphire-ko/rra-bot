@@ -9,7 +9,6 @@ import {
 (async () => {
 	try {
 		const app = new App();
-		await app.initialize();
 
 		while(true) {
 			printLog('parse start');
@@ -23,7 +22,7 @@ import {
 
 			printLog('wait start');
 
-			await new Promise((resolve) => {
+			await new Promise(resolve => {
 				setTimeout(resolve, 5 * 60 * 1000);
 			});
 
