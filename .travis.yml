@@ -1,15 +1,16 @@
 language: node_js
 
 node_js:
-  - "node"
+  - "10"
 
 sudo: false
 
 script:
-  - npm test
+  - npm run lint
+  - npm run test
 
 notifications:
   email: false
 
 after_success:
-  - npm run coveralls
+  - npx codecov
