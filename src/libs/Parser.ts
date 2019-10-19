@@ -1,64 +1,32 @@
-import https from 'https';
+import _ from 'lodash';
 
-import fetch from 'node-fetch';
 import cheerio from 'cheerio';
-import iconv from 'iconv-lite';
 
 import {
 	Item,
-} from '../models';
+} from '~/models';
 
 import {
-	getDateString,
-} from '../helpers';
+	getURL,
+	sendRequest,
+} from '~/helpers';
 
 import manufacturers from '../manufacturers.txt';
 
 export class Parser {
-	private date: string = '';
-	private items: Item[] = [];
+	// private async sendRequest(url: string) {
+	// 	const agent = new https.Agent({
+	// 		'rejectUnauthorized': false,
+	// 	});
 
-	private getURL(page: number) {
-		return `https://rra.go.kr/ko/license/A_c_search_view.do?cpage=${page}&category=&fromdate=${this.date}&todate=${this.date}`;
-	}
+	// 	const res = await fetch(url, {
+	// 		'agent': agent,
+	// 	});
 
-	private async sendRequest(url: string) {
-		const agent = new https.Agent({
-			'rejectUnauthorized': false,
-		});
+	// 	return res.arrayBuffer();
+	// }
 
-		const res = await fetch(url, {
-			'agent': agent,
-		});
-
-		return res.arrayBuffer();
-	}
-
-	private async parsePage(page: number) {
-		const url = this.getURL(page);
-
-		const body = await this.sendRequest(url);
-
-		const $ = cheerio.load(iconv.decode(Buffer.from(body), 'euc-kr'));
-
-		let count = 0;
-
-		$('table:first-child tr').each((i, e) => {
-			if (i >= 2) {
-				const item = this.parseItem($, $(e));
-
-				/* istanbul ignore else */
-				if (item !== null) {
-					this.items.push(item);
-					++count;
-				}
-			}
-		});
-
-		return count;
-	}
-
-	private parseItem($: CheerioStatic, e: Cheerio): Item | null {
+	public parseItem($: CheerioStatic, e: CheerioElement): Item | null {
 		try {
 			const column = $(e).find('td').toArray();
 
@@ -79,17 +47,31 @@ export class Parser {
 		}
 	}
 
-	public async parse(date: Date) {
-		this.date = getDateString(date);
-		this.items = [];
+	public async parsePage(page: number, date: string): Promise<Item[]> {
+		const url = getURL({ cpage: page, category: '', fromdate: date, todate: date });
+		const body = await sendRequest(url);
 
-		let page = 0;
-		let count = 0;
-		do {
-			count = await this.parsePage(++page);
+		const $ = cheerio.load(body);
+
+		const items: Item[] = [];
+		$('table:first-child tr').each((i, e) => {
+			if (i < 2) { return; }
+			const item = this.parseItem($, e);
+			if (item === null) { return; }
+			items.push(item);
+		});
+		return items;
+	}
+
+	public async parse(date: string): Promise<Item[]> {
+		let page = 1;
+		const itemsList: Item[][] = [];
+		while (true) {
+			const items = await this.parsePage(page, date);
+			if (items.length === 0) { break; }
+			itemsList.push(items);
+			++page;
 		}
-		while (count > 0);
-
-		return this.items;
+		return _.flatten(itemsList);
 	}
 }

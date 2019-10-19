@@ -1,11 +1,21 @@
 import schedule from 'node-schedule';
 
 import {
+	Item,
+} from '~/models';
+
+import {
 	Database,
 	Parser,
 	Server,
 	Tweeter,
 } from '~/libs';
+
+import {
+	getDateString,
+	getURL,
+	sendRequest,
+} from '~/helpers';
 
 export class App {
 	private database: Database;
@@ -20,7 +30,7 @@ export class App {
 		this.tweeter = new Tweeter(__config.twitter);
 	}
 
-	private async parse(date: Date): Promise<void> {
+	private async parse(date: string): Promise<void> {
 		const items = await this.parser.parse(date);
 		for (const item of items) {
 			await this.database.insertItem(item);
@@ -40,7 +50,9 @@ export class App {
 			const date = new Date();
 			console.log('parse', date);
 
-			await this.parse(date);
+			const dateString = getDateString(date);
+
+			await this.parse(dateString);
 			await this.tweet();
 		});
 	}
