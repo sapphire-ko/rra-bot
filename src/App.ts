@@ -9,6 +9,7 @@ import {
 
 import {
 	getDateString,
+	sleep,
 } from '~/helpers';
 
 export class App {
@@ -36,6 +37,7 @@ export class App {
 		for (const item of items) {
 			await this.tweeter.tweetItem(item);
 			await this.database.updateItem(item);
+			await sleep(1000);
 		}
 	}
 

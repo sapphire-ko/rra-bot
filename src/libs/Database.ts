@@ -17,12 +17,7 @@ export class Database {
 	private readonly redis: IORedis.Redis;
 
 	public constructor() {
-		if (__test) {
-			this.redis = new IORedisMock();
-		}
-		else {
-			this.redis = new IORedis(process.env.REDIS_HOST);
-		}
+		this.redis = __test ? new IORedisMock() : new IORedis(process.env.REDIS_HOST);
 	}
 
 	public get key() {

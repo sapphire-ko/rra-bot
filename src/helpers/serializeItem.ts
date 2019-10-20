@@ -8,8 +8,7 @@ export function serializeItem(item: Item): string {
 
 export function deserializeItem(value: string): Item | null {
 	try {
-		const item = JSON.parse(value);
-		return item;
+		return JSON.parse(value);
 	}
 	catch {
 		return null;
