@@ -49,6 +49,11 @@ export class Database {
 		return items.filter((x): x is Item => x !== null);
 	}
 
+	public async getUntweetedItems(): Promise<Item[]> {
+		const items = await this.getItems();
+		return items.filter((x): x is Item => x !== null).filter(x => x.tweet === 0);
+	}
+
 	public async insertItem(nextItem: Item): Promise<boolean> {
 		const id = nextItem.id;
 

@@ -56,6 +56,25 @@ describe('libs/Database', () => {
 		});
 	});
 
+	describe('getUntweetedItems', () => {
+		test('success', async () => {
+			const items = await database.getUntweetedItems();
+			expect(items).toHaveLength(1);
+			expect(items[0]).toEqual(prevItem);
+		});
+
+		test('success - no items', async () => {
+			const item = _.cloneDeep(prevItem);
+			item.tweet = 1;
+
+			const res = await database.updateItem(item);
+			expect(res).toBe(true);
+
+			const items = await database.getUntweetedItems();
+			expect(items).toHaveLength(0);
+		});
+	});
+
 	describe('insertItem', () => {
 		test('success', async () => {
 			const item = getRandomItem();

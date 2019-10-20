@@ -32,7 +32,7 @@ export class App {
 	}
 
 	private async tweet(): Promise<void> {
-		const items = await this.database.getItems();
+		const items = await this.database.getUntweetedItems();
 		for (const item of items) {
 			await this.tweeter.tweetItem(item);
 			await this.database.updateItem(item);

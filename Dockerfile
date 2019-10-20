@@ -10,6 +10,7 @@ RUN apk update \
 		&& apk add --no-cache git
 
 COPY package* ./
+
 RUN npm install
 
 COPY . .
