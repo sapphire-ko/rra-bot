@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://sapphiredev@github.com/sapphiredev/rra_bot.git"
+    "url": "git+https://sapphiredev@github.com/sapphiredev/rra-bot.git"
   },
   "author": "sapphire",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sapphiredev/rra_bot/issues"
+    "url": "https://github.com/sapphiredev/rra-bot/issues"
   },
-  "homepage": "https://github.com/sapphiredev/rra_bot#readme",
+  "homepage": "https://github.com/sapphiredev/rra-bot#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.17.1",

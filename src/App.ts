@@ -1,10 +1,6 @@
 import schedule from 'node-schedule';
 
 import {
-	Item,
-} from '~/models';
-
-import {
 	Database,
 	Parser,
 	Server,
@@ -13,8 +9,6 @@ import {
 
 import {
 	getDateString,
-	getURL,
-	sendRequest,
 } from '~/helpers';
 
 export class App {
@@ -27,7 +21,7 @@ export class App {
 		this.database = new Database();
 		this.parser = new Parser();
 		this.server = new Server();
-		this.tweeter = new Tweeter(__config.twitter);
+		this.tweeter = new Tweeter(__config);
 	}
 
 	private async parse(date: string): Promise<void> {
