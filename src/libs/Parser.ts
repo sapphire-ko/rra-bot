@@ -14,18 +14,6 @@ import {
 import manufacturers from '../manufacturers.txt';
 
 export class Parser {
-	// private async sendRequest(url: string) {
-	// 	const agent = new https.Agent({
-	// 		'rejectUnauthorized': false,
-	// 	});
-
-	// 	const res = await fetch(url, {
-	// 		'agent': agent,
-	// 	});
-
-	// 	return res.arrayBuffer();
-	// }
-
 	public parseItem($: CheerioStatic, e: CheerioElement): Item | null {
 		try {
 			const column = $(e).find('td').toArray();
