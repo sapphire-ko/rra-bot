@@ -43,7 +43,7 @@ export class Parser {
 
 		const items: Item[] = [];
 		$('table:first-child tr').each((i, e) => {
-			if (i < 2) { return; }
+			if (i < 1) { return; }
 			const item = this.parseItem($, e);
 			if (item === null) { return; }
 			items.push(item);
