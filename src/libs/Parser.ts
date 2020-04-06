@@ -20,6 +20,10 @@ export class Parser {
 
 			const link = $(column[0]).find('a').attr('href');
 
+			if (link === undefined) {
+				return null;
+			}
+
 			const id = link.split('=').pop()!;
 			const manufacturer = $(column[0]).text().trim();
 			const tweet = manufacturers.indexOf(manufacturer) === -1 ? 2 : 0;
