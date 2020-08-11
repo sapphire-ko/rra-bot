@@ -22,8 +22,8 @@ describe('libs/Parser', () => {
 		test('success - valid', async () => {
 			const date = '20180802';
 			const items = await parser.parse(date);
-			expect(items).toHaveLength(156);
-			expect(items[0].id).toBe('201817210000184911');
+			expect(items).toHaveLength(174);
+			expect(items[0].id).toBe('201817210000184742');
 		});
 
 		test('success - invalid', async () => {
