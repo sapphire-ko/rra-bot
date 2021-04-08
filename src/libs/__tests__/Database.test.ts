@@ -42,7 +42,7 @@ describe('libs/Database', () => {
 		});
 
 		test('failure - not found', async () => {
-			const id = faker.random.uuid();
+			const id = faker.datatype.uuid();
 			const item = await database.getItem(id);
 			expect(item).toBeNull();
 		});
