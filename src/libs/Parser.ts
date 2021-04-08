@@ -1,20 +1,17 @@
 import _ from 'lodash';
-
 import cheerio from 'cheerio';
-
 import {
 	Item,
+	Parameters,
 } from '~/models';
-
 import {
 	getURL,
 	sendRequest,
 } from '~/helpers';
-
 import manufacturers from '../manufacturers.txt';
 
 export class Parser {
-	public parseItem($: CheerioStatic, e: CheerioElement): Item | null {
+	public parseItem($: any, e: any): Item | null {
 		try {
 			const column = $(e).find('td').toArray();
 
@@ -40,8 +37,13 @@ export class Parser {
 	}
 
 	public async parsePage(page: number, date: string): Promise<Item[]> {
-		const url = getURL({ cpage: page, category: '', fromdate: date, todate: date });
-		const body = await sendRequest(url);
+		const url = getURL();
+		const params: Parameters = {
+			cpage: page,
+			fromdate: date,
+			todate: date,
+		};
+		const body = await sendRequest(url, params);
 
 		const $ = cheerio.load(body);
 

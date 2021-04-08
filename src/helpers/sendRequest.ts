@@ -1,15 +1,19 @@
 import iconv from 'iconv-lite';
-import request from 'request-promise';
+import fetch from 'node-fetch';
+import { Parameters } from '~/models';
 
-import {
-	USER_AGENT,
-} from '~/constants';
-
-export async function sendRequest(url: string) {
-	const body = await request({
-		url,
-		headers: { 'User-Agent': USER_AGENT },
-		encoding: null,
+export const sendRequest = async (url: string, params?: Parameters): Promise<string> => {
+	const res = await fetch(url, {
+		method: 'POST',
+		headers: {
+			'content-type': 'application/x-www-form-urlencoded',
+			referer: url,
+		},
+		body: params ? `cpage=${params.cpage}&category=&fromdate=${params.fromdate}&todate=${params.todate}&firm=&equip=&model_no=&app_no=&maker=&nation=` : '',
 	});
+	if(!res.ok) {
+		throw new Error(res.statusText);
+	}
+	const body = await res.buffer();
 	return iconv.decode(body, 'euc-kr');
 }

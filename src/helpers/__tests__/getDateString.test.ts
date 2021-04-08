@@ -1,8 +1,5 @@
 import faker from 'faker';
-
-import {
-	getDateString,
-} from '../getDateString';
+import { getDateString } from '../getDateString';
 
 describe('helpers/getDate', () => {
 	test('success', () => {

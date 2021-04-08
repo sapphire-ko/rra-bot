@@ -2,7 +2,7 @@ import {
 	Parser,
 } from '../Parser';
 
-jest.setTimeout(120000);
+jest.setTimeout(240000);
 
 describe('libs/Parser', () => {
 	const parser = new Parser();
