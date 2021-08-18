@@ -1,5 +1,6 @@
 import iconv from 'iconv-lite';
 import fetch from 'node-fetch';
+import { USER_AGENT } from '~/constants';
 import { Parameters } from '~/models';
 
 export const sendRequest = async (url: string, params?: Parameters): Promise<string> => {
@@ -21,13 +22,13 @@ export const sendRequest = async (url: string, params?: Parameters): Promise<str
 		]);
 		return values.map(x => x.join('=')).join('&');
 	};
-	const res = await fetch(url, {
-		method: 'POST',
+	const res = await fetch(`${url}?${params ? stringifyParams(params) : ''}`, {
+		method: 'GET',
 		headers: {
 			'content-type': 'application/x-www-form-urlencoded',
+			'User-Agent': USER_AGENT,
 			referer: url,
 		},
-		body: params ? stringifyParams(params) : '',
 	});
 	if (!res.ok) {
 		throw new Error(res.statusText);

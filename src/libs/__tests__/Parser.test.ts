@@ -9,7 +9,7 @@ describe('libs/Parser', () => {
 
 	describe('parsePage', () => {
 		test('success', async () => {
-			const date = '20180802';
+			const date = '20180804';
 			const page = 0;
 
 			const items = await parser.parsePage(page, date);
